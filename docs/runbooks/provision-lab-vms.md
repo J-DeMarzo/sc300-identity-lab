@@ -34,15 +34,19 @@ Console from the Proxmox web UI. The account is `Administrator` on `DC01` and `l
 
 ## Reaching the lab from a desktop
 
-The lab network is isolated, so a desktop on a home VLAN has no route to `10.12.41.0/24` and cannot ping or RDP to it directly. That is the design (isolation test T6). Sevro owns the `sc300` bridge, so it can reach every lab VM. Administration of the homelab happens from `ops`, and only `ops` holds a key for sevro, so tunnel through both hops. From the desktop (PowerShell or a shell):
+The lab network is isolated, so a desktop on a home VLAN has no route to `10.12.41.0/24` and cannot ping or RDP to it directly. That is the design (isolation test T6). Sevro owns the `sc300` bridge, so it can reach every lab VM. The Windows desktop's key (`JDeMa@Windows`) is authorized on sevro for this purpose (added 2026-10-14), so tunnel through sevro from the desktop (PowerShell or a shell):
+
+```
+ssh -N -L 3390:10.12.41.2:3389 -L 3391:10.12.41.11:3389 -L 3392:10.12.41.12:3389 demarzo@sevro
+```
+
+Leave it running, then point an RDP client at `localhost:3390` (dc01), `localhost:3391` (ws01) or `localhost:3392` (ws02). The Proxmox web console also always works and needs no network.
+
+From a device whose key is only on `ops` (the laptop), hop through ops instead. The first hop forwards the local ports to ops, and the command it runs there opens the second hop to sevro:
 
 ```
 ssh -L 3390:localhost:3390 -L 3391:localhost:3391 -L 3392:localhost:3392 demarzo@ops "ssh -N -L 3390:10.12.41.2:3389 -L 3391:10.12.41.11:3389 -L 3392:10.12.41.12:3389 sevro"
 ```
-
-The first hop forwards the desktop's local ports to ops. The command it runs on ops opens the second hop to sevro, which reaches the lab VMs. Leave it running, then point an RDP client at `localhost:3390` (dc01), `localhost:3391` (ws01) or `localhost:3392` (ws02). The Proxmox web console also always works and needs no network.
-
-Connecting straight to sevro (`ssh demarzo@sevro`) from the desktop is refused: the Windows desktop's key is authorized on ops only, so a lost desktop does not hold a key to every host.
 
 Notes:
 - RDP is enabled on dc01 (checked 2026-10-14: TCP 3389 answers from sevro). It is not enabled on the Windows 11 clients by default; use the console, or enable it under Settings > System > Remote Desktop.
