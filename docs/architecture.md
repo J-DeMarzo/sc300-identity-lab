@@ -6,14 +6,15 @@ The lab uses Proxmox SDN so its network exists only inside the hypervisor: no VL
 
 | Item | Value | Verified |
 |---|---|---|
-| Zone | `sc900` (type `simple`, IPAM `pve`, DHCP `dnsmasq`) | 2026-10-14, `pvesh get /cluster/sdn/zones` |
-| Vnet | `sc900` | 2026-10-14 |
-| Subnet | `10.12.45.0/24`, gateway `10.12.45.1`, SNAT on | 2026-10-14 |
-| DHCP range | `10.12.45.50` to `10.12.45.100` | 2026-10-14 |
+| Zone | `sc300` (type `simple`, no SDN IPAM or DHCP) | 2026-10-14, `pvesh get /cluster/sdn/zones` |
+| Vnet | `sc300` | 2026-10-14 |
+| Subnet | `10.12.41.0/24`, gateway `10.12.41.1`, SNAT on | 2026-10-14 |
+| Bridge | `sc300` is up on darrow, sevro and ragnar, each with `10.12.41.1/24` | 2026-10-14, `ip -br a show sc300` |
+| SNAT | `-s 10.12.41.0/24 -o vmbr0 -j SNAT --to-source <node mgmt IP>` | 2026-10-14, `iptables -t nat -S` |
 
-The zone and vnet were created ahead of this repo under an earlier name. Renaming to `sc300` is a recreate (SDN IDs are immutable and limited to 8 characters), tracked in the [roadmap](roadmap.md).
+Desired state is kept in [`sdn/`](../sdn/) so the network can be rebuilt. The earlier zone was deleted and recreated with this name and range. Zone IDs are immutable and capped at 8 characters, hence `sc300`.
 
-Desired state is kept in [`sdn/`](../sdn/) so the network can be rebuilt.
+Because a simple zone is per-node, the same `10.12.41.1` exists on all three nodes as three separate, unconnected segments. Only the node that hosts the lab VMs matters.
 
 ### Addressing plan
 
@@ -21,13 +22,13 @@ Desired state is kept in [`sdn/`](../sdn/) so the network can be rebuilt.
 |---|---|
 | `.1` | SDN gateway (the node) |
 | `.2` to `.49` | Static: DC, sync server, servers |
-| `.50` to `.100` | DHCP: clients |
+| `.50` to `.100` | DHCP scope served by the lab DC ([ADR 0002](adr/0002-dc-serves-dhcp.md)) |
 
 ## Hosts
 
 | Host | Role | Status |
 |---|---|---|
-| DC | AD DS and DNS for the lab forest | 🗓️ Planned |
+| DC | AD DS, DNS and DHCP for the lab forest, static `10.12.41.2` | 🗓️ Planned |
 | Sync server | Entra Connect or Cloud Sync agent | 🗓️ Planned |
 | Win11 client | Domain join, hybrid join, Intune enrollment | 🗓️ Planned |
 

@@ -13,7 +13,7 @@ The lab has three or four VMs, and the cluster nodes have 8 to 12 threads and 23
 
 | Zone | Spans nodes | Needs physical config | Notes |
 |---|---|---|---|
-| Simple | No, one node only | No | Simplest. Built-in SNAT and DHCP. All lab VMs pinned to one node |
+| Simple | No, one node only | No | Simplest. Built-in SNAT. All lab VMs pinned to one node |
 | VXLAN | Yes | No (UDP 4789 between nodes) | Overlay across nodes. Needs an MTU reduction of 50 bytes. SNAT is still done on a node |
 | VLAN | Yes | Yes, trunk and router config | Reuses physical network. Defeats the "no physical change" goal |
 
