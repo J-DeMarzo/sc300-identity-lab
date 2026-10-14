@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# lab-vm - provision the SC-300 lab VMs on sevro, attached to the isolated sc300 bridge.
+#
+# Run from the admin host (ops). Creates plain Windows machines from unattended installs:
+# no AD DS, DNS, DHCP or domain join. Those are configured by hand in the course.
+#
+#   lab-vm create NAME    create the VM and its answer ISO (NAME: dc01 | ws01 | ws02)
+#   lab-vm install NAME   start it and wait until Windows is installed and the guest agent answers
+#   lab-vm finish NAME    detach the install media and delete the answer ISO (it holds the password)
+#   lab-vm up NAME        create + install + finish
+#   lab-vm status         state of all three
+#
+# The local administrator password is generated once into ~/.config/sc300-lab/admin.pass
+# (ops only, mode 600) and is never printed or committed.
+set -euo pipefail
+
+NODE=sevro
+STORAGE=fast-local
+BRIDGE=sc300
+GATEWAY=10.12.41.1
+PASSFILE=$HOME/.config/sc300-lab/admin.pass
+HERE=$(cd "$(dirname "$0")/.." && pwd)
+ISO_DIR_SEFI=/pax/iso/template/iso    # local ZFS path behind the NFS "ISO" storage
+SERVER_ISO=ISO:iso/WinServer2025-eval-26100.32230.iso
+CLIENT_ISO=ISO:iso/Win11Ent-eval-26300.9457.iso
+VIRTIO_ISO=ISO:iso/virtio-win-0.1.285.iso
+
+# name  vmid  ip           kind    disk
+declare -A VMID=([dc01]=252 [ws01]=253 [ws02]=254)
+declare -A IP=([dc01]=10.12.41.2 [ws01]=10.12.41.11 [ws02]=10.12.41.12)
+declare -A KIND=([dc01]=server [ws01]=client [ws02]=client)
+declare -A DISK=([dc01]=60 [ws01]=64 [ws02]=64)
+
+die() { echo "ERROR: $*" >&2; exit 1; }
+node() { ssh -n -o BatchMode=yes "$NODE" "$@"; }                              # one command string
+nodeq() { ssh -n -o BatchMode=yes "$NODE" "$(printf '%q ' "$@")"; }          # separate, safely quoted arguments
+
+name=${2:-}
+if [[ ${1:-} != status ]]; then
+  [[ -n ${VMID[$name]:-} ]] || die "usage: lab-vm {create|install|finish|up} dc01|ws01|ws02"
+  id=${VMID[$name]}
+  answer_iso=sc300-$name-answer.iso
+fi
+
+ensure_password() {
+  [[ -s $PASSFILE ]] && return
+  mkdir -p "$(dirname "$PASSFILE")"; chmod 700 "$(dirname "$PASSFILE")"
+  (umask 077; head -c 24 /dev/urandom | base64 | tr -d '/+=' | cut -c1-20 | sed 's/$/aA1!/' > "$PASSFILE")
+}
+
+cmd_create() {
+  node "sudo qm status $id" >/dev/null 2>&1 && die "VM $id already exists"
+  ensure_password
+  local tmpl=$HERE/windows/autounattend-$([[ ${KIND[$name]} == server ]] && echo server || echo client).xml
+  local filled
+  filled=$(sed -e "s/__COMPUTER_NAME__/${name^^}/g" -e "s/__IP__/${IP[$name]}/g" \
+               -e "s/__ADMIN_PASSWORD__/$(sed 's/[&/\]/\\&/g' "$PASSFILE")/g" "$tmpl")
+  python3 -c 'import sys,xml.dom.minidom as m; m.parseString(sys.stdin.buffer.read())' <<<"$filled" || die "answer file is not valid XML"
+  # Build the answer ISO on sefi itself (local ZFS), never through an NFS client (INC-2026-001).
+  b64=$(base64 -w0 <<<"$filled")
+  ssh -o BatchMode=yes sefi "sudo bash -s" <<EOF
+set -e; d=\$(mktemp -d); trap 'rm -rf \$d' EXIT; mkdir \$d/root
+echo $b64 | base64 -d > \$d/root/autounattend.xml
+genisoimage -quiet -J -r -V ANSWER -o $ISO_DIR_SEFI/.$answer_iso.tmp \$d/root
+chmod 644 $ISO_DIR_SEFI/.$answer_iso.tmp; mv $ISO_DIR_SEFI/.$answer_iso.tmp $ISO_DIR_SEFI/$answer_iso
+EOF
+  local desc="### ${name} · SC-300 lab $([[ ${KIND[$name]} == server ]] && echo 'server (workgroup, no roles yet)' || echo 'Windows 11 client (workgroup)')
+
+| | |
+|---|---|
+| **Role** | Kennel Corp lab machine, configured by hand during SC-300 study |
+| **Network** | sc300 SDN (10.12.41.0/24) · static ${IP[$name]}, temporary |
+| **Owner** | demarzo |
+
+Docs: sc300-identity-lab repo"
+  local common=(--name "$name" --machine q35 --cpu x86-64-v2-AES --cores 2 --sockets 1 --memory 4096
+    --scsihw virtio-scsi-single --scsi0 "$STORAGE:${DISK[$name]},iothread=1,discard=on"
+    --ide0 "$VIRTIO_ISO,media=cdrom" --ide3 "ISO:iso/$answer_iso,media=cdrom"
+    --net0 "virtio,bridge=$BRIDGE" --agent 1 --ostype win11 --tags "lab;net-sc300" --description "$desc")
+  if [[ ${KIND[$name]} == server ]]; then
+    nodeq sudo qm create "$id" "${common[@]}" --bios seabios --ide2 "$SERVER_ISO,media=cdrom" --boot "order=scsi0;ide2"
+  else
+    nodeq sudo qm create "$id" "${common[@]}" --bios ovmf --efidisk0 "$STORAGE:1,efitype=4m,pre-enrolled-keys=1" \
+      --tpmstate0 "$STORAGE:1,version=v2.0" --ide2 "$CLIENT_ISO,media=cdrom" --boot "order=scsi0;ide2"
+  fi
+  echo "$name (VM $id on $NODE) created on bridge $BRIDGE. Not started."
+}
+
+cmd_install() {
+  node "sudo qm start $id"
+  if [[ ${KIND[$name]} == client ]]; then
+    # OVMF asks "Press any key to boot from CD or DVD" for a few seconds when the disk is empty.
+    node "for i in \$(seq 20); do sudo qm sendkey $id ret; sleep 1; done"
+  fi
+  echo "$name: installing; waiting for the guest agent (up to 40 min)"
+  for _ in $(seq 240); do
+    if node "sudo qm agent $id ping" >/dev/null 2>&1; then echo "$name: guest agent is up"; return; fi
+    sleep 10
+  done
+  die "$name did not report in; check the console"
+}
+
+cmd_finish() {
+  node "sudo qm set $id --delete ide0,ide2,ide3 --boot order=scsi0" >/dev/null
+  ssh -n -o BatchMode=yes sefi "sudo rm -fv $ISO_DIR_SEFI/$answer_iso"
+  echo "$name: install media detached, answer ISO deleted"
+}
+
+cmd_status() {
+  for n in dc01 ws01 ws02; do
+    printf '%s (VM %s): ' "$n" "${VMID[$n]}"
+    node "sudo qm status ${VMID[$n]}" 2>/dev/null | tr '\n' ' ' || true; echo
+  done
+}
+
+case ${1:-} in
+  create) cmd_create ;; install) cmd_install ;; finish) cmd_finish ;; status) cmd_status ;;
+  up) cmd_create; cmd_install; cmd_finish ;;
+  *) sed -n 2,16p "$0"; exit 2 ;;
+esac

@@ -30,11 +30,14 @@ A Microsoft 365 E5 trial tenant created 2026-10-14. E5 includes Entra ID P2, whi
 
 ## Hosts
 
-| Host | Role | Status |
-|---|---|---|
-| DC | AD DS, DNS and DHCP for `kennelcorp.demarzo.dev`, static `10.12.41.2` | 🗓️ Planned |
-| Sync server | Entra Connect or Cloud Sync agent | 🗓️ Planned |
-| Win11 client | Domain join, hybrid join, Intune enrollment | 🗓️ Planned |
+| Host | VMID | Role | Status |
+|---|---|---|---|
+| dc01 | 252 | Server 2025. Will become the DC for `kennelcorp.demarzo.dev` (AD DS, DNS, DHCP) | ✅ Provisioned 2026-10-14, workgroup, no roles yet. Static `10.12.41.2` |
+| ws01 | 253 | Windows 11 Enterprise client | ✅ Provisioned 2026-10-14, workgroup. Static `10.12.41.11` |
+| ws02 | 254 | Windows 11 Enterprise client | ✅ Provisioned 2026-10-14, workgroup. Static `10.12.41.12` |
+| Sync server | | Entra Connect or Cloud Sync agent | 🗓️ Planned |
+
+Build steps: [provision-lab-vms](runbooks/provision-lab-vms.md). The static addresses are temporary until the DC runs DHCP and DNS.
 
 All lab VMs run on sevro and attach to bridge `sc300`. They follow the homelab VMID scheme for sevro: `2xx`, with VMs in `250` to `299`. Windows images are evaluation editions. Their expiry dates are recorded in the inventory once built.
 
