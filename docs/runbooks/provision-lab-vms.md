@@ -32,6 +32,21 @@ scripts/lab-vm status
 
 Console from the Proxmox web UI. The account is `Administrator` on `DC01` and `labadmin` on the clients. The password is in `~/.config/sc300-lab/admin.pass` on ops.
 
+## Reaching the lab from a desktop
+
+The lab network is isolated, so a desktop on a home VLAN has no route to `10.12.41.0/24` and cannot ping or RDP to it directly. That is the design (isolation test T6). Sevro owns the `sc300` bridge, so it can reach every lab VM. Tunnel through it:
+
+```
+ssh -N -L 3390:10.12.41.2:3389 -L 3391:10.12.41.11:3389 -L 3392:10.12.41.12:3389 demarzo@sevro
+```
+
+Leave that running, then point an RDP client at `localhost:3390` (dc01), `localhost:3391` (ws01) or `localhost:3392` (ws02). The proxmox console in the web UI also always works and needs no network.
+
+Notes:
+- RDP is enabled on dc01 (checked 2026-10-14: TCP 3389 answers from sevro). It is not enabled on the Windows 11 clients by default; use the console, or enable it under Settings > System > Remote Desktop.
+- Ping to the lab VMs times out even from sevro, because Windows blocks inbound ICMP echo by default. Test with a TCP port instead.
+- Do not add a route to `10.12.41.0/24` on the home router. That would put the lab on the home network and defeat the isolation tests.
+
 ## Evaluation licenses
 
 Windows Server and Windows 11 evaluation editions expire. Rebuild from this runbook when they do, or re-arm where Microsoft allows it. Expiry read with `slmgr /xpr` on 2026-10-14:
