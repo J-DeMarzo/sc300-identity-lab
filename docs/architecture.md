@@ -24,6 +24,10 @@ Because a simple zone is per-node, the same `10.12.41.1` exists on all three nod
 | `.2` to `.49` | Static: DC, sync server, servers |
 | `.50` to `.100` | DHCP scope served by the lab DC ([ADR 0002](adr/0002-dc-serves-dhcp.md)) |
 
+## Cloud tenant
+
+A Microsoft 365 E5 trial tenant created 2026-10-14. E5 includes Entra ID P2, which the exam needs for PIM, Identity Protection and access reviews. Trials expire, so labs that depend on licensed features are written up with evidence while the tenant is active. The tenant name and IDs are intentionally not recorded in this repo; labs refer to it as `<tenant>.onmicrosoft.com`.
+
 ## Hosts
 
 | Host | Role | Status |

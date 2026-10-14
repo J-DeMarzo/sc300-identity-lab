@@ -33,7 +33,7 @@ flowchart LR
 | **Hypervisor** | Proxmox VE 9 cluster, SDN configured at datacenter level |
 | **Network** | SDN zone + vnet + subnet, SNAT egress, no route into the home VLANs (to be proven, see [isolation tests](docs/architecture.md#isolation-tests)) |
 | **On-prem identity** | Dedicated AD forest, separate from any other domain in the homelab |
-| **Cloud identity** | Microsoft Entra ID tenant (developer or trial) |
+| **Cloud identity** | Microsoft 365 E5 trial tenant (Entra ID P2, Intune, Defender) |
 
 Design detail: [architecture](docs/architecture.md) · [decisions](docs/adr/)
 
