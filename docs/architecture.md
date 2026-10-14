@@ -32,7 +32,7 @@ A Microsoft 365 E5 trial tenant created 2026-10-14. E5 includes Entra ID P2, whi
 
 | Host | Role | Status |
 |---|---|---|
-| DC | AD DS, DNS and DHCP for `corp.demarzo.dev`, static `10.12.41.2` | 🗓️ Planned |
+| DC | AD DS, DNS and DHCP for `kennelcorp.demarzo.dev`, static `10.12.41.2` | 🗓️ Planned |
 | Sync server | Entra Connect or Cloud Sync agent | 🗓️ Planned |
 | Win11 client | Domain join, hybrid join, Intune enrollment | 🗓️ Planned |
 

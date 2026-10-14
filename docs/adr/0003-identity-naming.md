@@ -1,6 +1,6 @@
 # ADR 0003: Naming for the Kennel Corp forest and tenant
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-10-14
 
 ## Context
@@ -12,12 +12,12 @@ Hybrid sync only gives users a sign-in name in the cloud domain if the on-premis
 | Option | Effect |
 |---|---|
 | Forest root is `demarzo.dev` itself | Internal clients resolve the public site through the DC and lose it, or the DC has to mirror every public record. Microsoft advises against it |
-| Forest root is a subdomain, `corp.demarzo.dev`, with UPN suffix `demarzo.dev` | Internal DNS is authoritative only for `corp`. Users sign in as `user@demarzo.dev`. Public DNS is untouched except for one verification record |
+| Forest root is a subdomain, `kennelcorp.demarzo.dev`, with UPN suffix `demarzo.dev` | Internal DNS is authoritative only for `kennelcorp`. Users sign in as `user@demarzo.dev`. Public DNS is untouched except for one verification record |
 | Non-routable forest such as `kennel.local` | Works, but needs an alternate UPN suffix anyway and is a pattern to avoid |
 
 ## Decision
 
-Forest root `corp.demarzo.dev`, NetBIOS name `KENNEL`, additional UPN suffix `demarzo.dev`. Verify `demarzo.dev` in the tenant with a TXT record at the registrar. The DC's DNS forwards to public resolvers.
+Forest root `kennelcorp.demarzo.dev`, NetBIOS name `KENNELCORP`, additional UPN suffix `demarzo.dev`. Verify `demarzo.dev` in the tenant with a TXT record at the registrar. The DC's DNS forwards to public resolvers.
 
 ## Consequences
 

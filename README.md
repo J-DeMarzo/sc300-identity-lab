@@ -32,7 +32,7 @@ flowchart LR
 |---|---|
 | **Hypervisor** | Proxmox VE 9 cluster, SDN configured at datacenter level |
 | **Network** | SDN zone + vnet + subnet, SNAT egress, no route into the home VLANs (to be proven, see [isolation tests](docs/architecture.md#isolation-tests)) |
-| **On-prem identity** | Dedicated AD forest for Kennel Corp (`corp.demarzo.dev`, NetBIOS `KENNEL`), separate from any other domain in the homelab ([ADR 0003](docs/adr/0003-identity-naming.md)) |
+| **On-prem identity** | Dedicated AD forest for Kennel Corp (`kennelcorp.demarzo.dev`, NetBIOS `KENNELCORP`), separate from any other domain in the homelab ([ADR 0003](docs/adr/0003-identity-naming.md)) |
 | **Cloud identity** | Microsoft 365 E5 trial tenant `thekennel.onmicrosoft.com` (Entra ID P2, Intune, Defender), with `demarzo.dev` as the custom domain |
 
 Design detail: [architecture](docs/architecture.md) · [decisions](docs/adr/)
