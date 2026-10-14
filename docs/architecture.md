@@ -14,7 +14,7 @@ The lab uses Proxmox SDN so its network exists only inside the hypervisor: no VL
 
 Desired state is kept in [`sdn/`](../sdn/) so the network can be rebuilt. The earlier zone was deleted and recreated with this name and range. Zone IDs are immutable and capped at 8 characters, hence `sc300`.
 
-Because a simple zone is per-node, the same `10.12.41.1` exists on all three nodes as three separate, unconnected segments. Only the node that hosts the lab VMs matters.
+Because a simple zone is per-node, the same `10.12.41.1` exists on all three nodes as three separate, unconnected segments. Only the node that hosts the lab VMs matters, and that is **sevro** ([ADR 0001](adr/0001-isolated-sdn-zone-type.md)). Its SNAT address is `10.12.5.12`.
 
 ### Addressing plan
 
@@ -32,7 +32,7 @@ Because a simple zone is per-node, the same `10.12.41.1` exists on all three nod
 | Sync server | Entra Connect or Cloud Sync agent | 🗓️ Planned |
 | Win11 client | Domain join, hybrid join, Intune enrollment | 🗓️ Planned |
 
-Windows images are evaluation editions. Their expiry dates are recorded in the inventory once built.
+All lab VMs run on sevro and attach to bridge `sc300`. They follow the homelab VMID scheme for sevro: `2xx`, with VMs in `250` to `299`. Windows images are evaluation editions. Their expiry dates are recorded in the inventory once built.
 
 ## Isolation tests
 

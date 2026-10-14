@@ -1,13 +1,13 @@
 # ADR 0001: SDN zone type for the isolated lab
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-10-14
 
 ## Context
 
 The SC-300 lab needs a network that is separate from the home VLANs, has outbound internet (Entra sync and sign-in need HTTPS to Microsoft), and can be torn down and rebuilt without touching physical switching. Proxmox SDN offers several zone types.
 
-The lab has three or four VMs, and the cluster nodes have 8 to 12 threads and 23 to 31 GiB of RAM each, so a single node may be too tight if other guests share it.
+The lab has three or four VMs, and the cluster nodes have 8 to 12 threads and 23 to 31 GiB of RAM each, so a single node could be too tight if other guests share it.
 
 ## Options
 
@@ -19,7 +19,7 @@ The lab has three or four VMs, and the cluster nodes have 8 to 12 threads and 23
 
 ## Decision
 
-Start with the existing **simple** zone and pin all lab VMs to a single node. Move to VXLAN only if one node cannot hold the lab.
+Use a **simple** zone and run every lab VM on **sevro**. The lab is expected to be the DC plus two or three other VMs (sync server and one or two clients). Sevro had about 27 GiB RAM and 317 GiB of `fast-local` free on 2026-10-14, with an idle CPU, which covers that. Move to VXLAN only if one node cannot hold the lab.
 
 ## Consequences
 
