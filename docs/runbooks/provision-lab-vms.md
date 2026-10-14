@@ -50,4 +50,4 @@ First-boot note: the guest agent answers before Windows finishes its first-logon
 
 ## Reset
 
-The machines have no snapshots yet. Take one named `clean-install` before starting the course exercises so a lab can be rolled back.
+Each VM has a snapshot named `clean-install`, taken 2026-10-14 right after the first build (workgroup, no roles, no RAM state). Roll back with `qm rollback <vmid> clean-install` on sevro or from the Proxmox UI. A rollback restores the disk only, so a machine that has joined a domain must also be removed from that domain's directory, or its computer account will be stale.
