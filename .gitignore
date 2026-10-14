@@ -1,0 +1,18 @@
+# Secrets: never commit these
+.env
+.env.*
+*.key
+*.pem
+*.pfx
+secrets/
+*vault*.yml
+!*vault*.example.yml
+
+# Raw, unredacted screenshots
+docs/images/raw/
+
+# Local tooling
+.claude/settings.local.json
+__pycache__/
+*.pyc
+.venv/
