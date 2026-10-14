@@ -26,13 +26,13 @@ Because a simple zone is per-node, the same `10.12.41.1` exists on all three nod
 
 ## Cloud tenant
 
-A Microsoft 365 E5 trial tenant created 2026-10-14. E5 includes Entra ID P2, which the exam needs for PIM, Identity Protection and access reviews. Trials expire, so labs that depend on licensed features are written up with evidence while the tenant is active. The tenant name and IDs are intentionally not recorded in this repo; labs refer to it as `<tenant>.onmicrosoft.com`.
+A Microsoft 365 E5 trial tenant created 2026-10-14. E5 includes Entra ID P2, which the exam needs for PIM, Identity Protection and access reviews. Trials expire, so labs that depend on licensed features are written up with evidence while the tenant is active. The tenant is `thekennel.onmicrosoft.com`, the company is the fictional Kennel Corp, and `demarzo.dev` is added as a custom domain ([ADR 0003](adr/0003-identity-naming.md)). Tenant IDs, admin account names, and credentials are not recorded in this repo.
 
 ## Hosts
 
 | Host | Role | Status |
 |---|---|---|
-| DC | AD DS, DNS and DHCP for the lab forest, static `10.12.41.2` | 🗓️ Planned |
+| DC | AD DS, DNS and DHCP for `corp.demarzo.dev`, static `10.12.41.2` | 🗓️ Planned |
 | Sync server | Entra Connect or Cloud Sync agent | 🗓️ Planned |
 | Win11 client | Domain join, hybrid join, Intune enrollment | 🗓️ Planned |
 

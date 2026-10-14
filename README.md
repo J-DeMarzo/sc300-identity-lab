@@ -1,8 +1,8 @@
-# SC-300 Identity Lab
+# SC-300 Identity Lab: Kennel Corp
 
 A hands-on lab for the **Microsoft SC-300 (Identity and Access Administrator)** exam, built on an **isolated software-defined network in Proxmox VE**. It runs a small on-premises Active Directory forest that syncs to a Microsoft Entra ID tenant, so every exam objective can be practiced against a real hybrid environment rather than read about.
 
-The repo is the build log: what was built, why, how it was verified, and what each lab proved.
+The lab models a fictional small company, **Kennel Corp**, whose staff sign in as `@demarzo.dev`. The repo is the build log: what was built, why, how it was verified, and what each lab proved.
 
 > **Status:** network layer in progress. See the [roadmap](docs/roadmap.md) for what is done and what is planned. Nothing here is marked done until it has been tested.
 
@@ -32,8 +32,8 @@ flowchart LR
 |---|---|
 | **Hypervisor** | Proxmox VE 9 cluster, SDN configured at datacenter level |
 | **Network** | SDN zone + vnet + subnet, SNAT egress, no route into the home VLANs (to be proven, see [isolation tests](docs/architecture.md#isolation-tests)) |
-| **On-prem identity** | Dedicated AD forest, separate from any other domain in the homelab |
-| **Cloud identity** | Microsoft 365 E5 trial tenant (Entra ID P2, Intune, Defender) |
+| **On-prem identity** | Dedicated AD forest for Kennel Corp (`corp.demarzo.dev`, NetBIOS `KENNEL`), separate from any other domain in the homelab ([ADR 0003](docs/adr/0003-identity-naming.md)) |
+| **Cloud identity** | Microsoft 365 E5 trial tenant `thekennel.onmicrosoft.com` (Entra ID P2, Intune, Defender), with `demarzo.dev` as the custom domain |
 
 Design detail: [architecture](docs/architecture.md) · [decisions](docs/adr/)
 
@@ -64,4 +64,4 @@ scripts/               helper scripts
 
 ## Security notes
 
-No tenant IDs, credentials, or keys are committed. Screenshots are redacted before they are added to `docs/images/`.
+Names here (Kennel Corp, `thekennel`) are fictional or non-secret. No tenant IDs, credentials, or keys are committed. Screenshots are redacted before they are added to `docs/images/`.
