@@ -34,6 +34,8 @@ Console from the Proxmox web UI. The account is `Administrator` on `DC01` and `l
 
 ## Reaching the lab from a desktop
 
+**Short version (Windows):** run [`scripts/lab-connect.ps1`](../../scripts/lab-connect.ps1). It checks SSH access, opens the tunnel below, starts Remote Desktop to dc01 (`-Target ws01|ws02|all` for the others, `-ViaOps` from the laptop, `-TunnelOnly` for your own client), and closes the tunnel when you press Enter. The manual commands follow.
+
 The lab network is isolated, so a desktop on a home VLAN has no route to `10.12.41.0/24` and cannot ping or RDP to it directly. That is the design (isolation test T6). Sevro owns the `sc300` bridge, so it can reach every lab VM. The Windows desktop's key (`JDeMa@Windows`) is authorized on sevro for this purpose (added 2026-10-14), so tunnel through sevro from the desktop (PowerShell or a shell):
 
 ```
