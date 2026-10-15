@@ -6,6 +6,8 @@ The lab models a fictional small company, **Kennel Corp**, whose staff sign in a
 
 > **Status:** network layer in progress. See the [roadmap](docs/roadmap.md) for what is done and what is planned. Nothing here is marked done until it has been tested.
 
+**Related project:** [enterprise-homelab](https://github.com/J-DeMarzo/enterprise-homelab), my SOC and infrastructure track (Splunk, detections, network segmentation), kept in its own repo with its own roadmap.
+
 ## What this demonstrates
 
 - **Hybrid identity:** AD DS synced to Entra ID with Entra Connect / Cloud Sync, hybrid device join, SSO
